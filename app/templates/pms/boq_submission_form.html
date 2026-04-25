@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}BOQ Submission{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:center;margin:60px auto;width:11in;">
+
+  <div style="
+    background:#2c1a03;
+    border:2px solid #ff9800;
+    box-shadow:0 0 25px rgba(255,152,0,0.4);
+    border-radius:12px;
+    padding:22px;
+    width:40%;
+  ">
+
+    <h2 style="
+      color:#ff9800;
+      text-align:center;
+      margin-bottom:22px;
+      font-family:'Segoe UI',sans-serif;
+    ">
+      📦 BOQ Submission Form
+    </h2>
+
+    <!-- ================= FORM ================= -->
+    <form method="POST" enctype="multipart/form-data">
+
+      <table style="
+        width:100%;
+        color:#fff;
+        font-size:14px;
+        border-collapse:separate;
+        border-spacing:12px;
+      ">
+
+        <!-- Planned Work Name -->
+        <tr>
+          <td style="width:32%;font-weight:600;">Planned Work Name</td>
+          <td>
+            <select name="plannedworkname" id="plannedworkname" required style="width:100%;padding:7px;">
+              <option value="">--Select Planned Work--</option>
+              {% for p in planned_work_list %}
+                <option value="{{ p.plannedworkname }}">
+                  {{ p.plannedworkname }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+
+        <!-- PMS Work ID -->
+        <tr>
+          <td style="font-weight:600;">PMS Work ID</td>
+          <td>
+            <select name="pmsworkid" id="pmsworkid" required style="width:100%;padding:7px;">
+              <option value="">--Select Planned Work First--</option>
+            </select>
+          </td>
+        </tr>
+
+        <!-- BOQ Quantity -->
+        <tr>
+          <td style="font-weight:600;">BOQ</td>
+          <td>
+            <input type="number" name="boq" step="0.01" min="1" required style="width:93%;padding:7px;">
+          </td>
+        </tr>
+
+        <!-- Actual Date -->
+        <tr>
+          <td style="font-weight:600;">Actual Date</td>
+          <td>
+            <input type="date" name="actual" required style="width:93%;padding:7px;">
+          </td>
+        </tr>
+
+        <!-- Attachment -->
+        <tr>
+          <td style="font-weight:600;">Attach Pore Card</td>
+          <td>
+            <input type="file"
+                   name="attachment"
+                   style="width:93%;padding:7px;">
+          </td>
+        </tr>
+
+        <!-- Contractor -->
+        <tr>
+          <td style="font-weight:600;">Contractor Name</td>
+          <td>
+            <select name="contractor" id="contractor" required style="font-weight:600;width:93%;">
+              <option value="">--Select--</option>
+              <option value="Salim">A.F. Enterprise-Salim</option>
+              <option value="Sajid">Sajid</option>
+          </td>
+        </tr>
+
+       <!-- Pilemarkno -->
+        <tr>
+          <td style="font-weight:600;">Pile Mark No.</td>
+          <td>
+            <input type="text" name="Pilemarkno" required style="width:93%;padding:7px;">
+          </td>
+        </tr>
+
+        <!-- Submitted By -->
+        <tr>
+          <td style="font-weight:600;">Submitted By</td>
+          <td>
+            <select name="submitBy" required
+                    style="width:100%;padding:7px;">
+              <option value="">Select</option>
+              {% for e in emp_list %}
+                <option value="{{ e.empname }}">{{ e.empname }}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+
+      </table>
+
+      <div style="text-align:center;margin-top:25px;">
+        <button type="submit" style="
+          background:#ff9800;
+          color:#2c1a03;
+          border:none;
+          padding:10px 26px;
+          border-radius:6px;
+          font-weight:600;
+          cursor:pointer;
+          font-size:14px;
+        ">
+          Submit BOQ
+        </button>
+      </div>
+
+    </form>
+
+<!-- ================= JS ================= -->
+<script>
+document.getElementById("plannedworkname").addEventListener("change", function () {
+    const workName = this.value;
+    const pmsSelect = document.getElementById("pmsworkid");
+
+    pmsSelect.innerHTML = "<option>Loading...</option>";
+
+    if (!workName) {
+        pmsSelect.innerHTML = "<option value=''>Select Planned Work First</option>";
+        return;
+    }
+
+    fetch(`/pms/get_pms_work_ids?plannedworkname=${encodeURIComponent(workName)}`)
+      .then(res => res.json())
+      .then(data => {
+          pmsSelect.innerHTML = "<option value=''>Select PMS Work ID</option>";
+          data.data.forEach(row => {
+              pmsSelect.innerHTML +=
+                `<option value="${row.pmsworkid}">${row.pmsworkid}</option>`;
+          });
+      })
+      .catch(() => {
+          pmsSelect.innerHTML = "<option>Error loading PMS Work IDs</option>";
+      });
+});
+</script>
+
+{% endblock %}

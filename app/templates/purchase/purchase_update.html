@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Update Purchase{% endblock %}
+
+{% block content %}
+
+<style>
+/* ==== Global Dark Theme ==== */
+body {
+    background: #1b0f02 !important;
+    color: #fff !important;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Centered Card */
+.purchase-card {
+    width: 400px;
+    margin: 40px auto;
+    background: #2c1a03;
+    border: 2px solid #ff9800;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 12px rgba(255,152,0,0.35);
+}
+
+/* Heading */
+.purchase-card h2 {
+    text-align: center;
+    color: #ffb74d;
+    margin-bottom: 25px;
+}
+
+/* Labels */
+.purchase-card label {
+    font-weight: bold;
+    color: #fff;
+}
+
+/* Input Fields */
+.purchase-card input[type="text"],
+.purchase-card select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    margin-bottom: 18px;
+    border: 1px solid #ff9800;
+    background: rgba(255,152,0,0.15);
+    border-radius: 6px;
+    color: #fff;
+}
+
+/* Dropdown options */
+.purchase-card select option {
+    background: #2c1a03;
+    color: #fff;
+    padding: 8px;
+}
+
+/* Button */
+.purchase-card .btn-submit {
+    width: 100%;
+    padding: 10px;
+    background: #ff9800;
+    border: none;
+    color: #1b0f02;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.purchase-card .btn-submit:hover {
+    background: #ffb74d;
+}
+
+/* Back button under card */
+.back-btn {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 8px;
+    text-align: center;
+    background: #2c1a03;
+    border: 2px solid #ff9800;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background: rgba(255,152,0,0.25);
+}
+</style>
+
+<div class="purchase-card">
+    <h2>📝 Update Purchase #{{ purchase.id }}</h2>
+
+    <form method="POST">
+        <label>Description</label>
+        <input type="text" name="description" value="{{ purchase.description }}">
+
+        <label>Job Reference</label>
+        <input type="text" name="job_reference" value="{{ purchase.job_reference }}">
+
+        <label>Prepared By</label>
+        <input type="text" name="prepared_by" value="{{ purchase.prepared_by }}">
+
+        <button type="submit" class="btn-submit">Update</button>
+    </form>
+</div>
+
+<a href="{{ url_for('auth.dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
+
+{% endblock %}

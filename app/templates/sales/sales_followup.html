@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Lead Follow-Up{% endblock %}
+
+{% block content %}
+<div class="update-box">
+  <h2>Follow-Up for Lead {{ lead.leadsid }}</h2>
+
+  <form method="POST" class="update-form">
+    <label>Status</label>
+    <select name="status1" required>
+      <option value="">--Select--</option>
+      <option>Switched off</option>
+      <option>Disconnected</option>
+      <option>Untouched</option>
+      <option>Duplicate call</option>
+      <option>Wrong no</option>
+      <option>Budget mismatch</option>
+      <option>Location mismatch</option>
+      <option>Vendor</option>
+      <option>Ongoing communication</option>
+      <option>Ask to call back letter</option>
+      <option>Site visit scheduled</option>
+      <option>Active</option>
+    </select>
+
+    <label>Remarks</label>
+    <textarea name="remarks1"></textarea>
+
+    <label>Whatsapp Sent?</label>
+    <select name="whatsapp_send1">
+      <option value="">--Select--</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+
+    <label>TAT (Days)</label>
+    <input type="number" name="tat1" min="0" placeholder="Days to next follow-up">
+
+    <label>Site Visit Date & Time</label>
+    <input type="datetime-local" name="site_visit_datetime">
+
+    <button type="submit">Update Follow-Up</button>
+  </form>
+
+  <div class="update-back">
+    <a href="{{ url_for('sales.presales_list') }}">← Back to Leads</a>
+  </div>
+</div>
+{% endblock %}

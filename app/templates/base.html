@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Team Taurus{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 🌙 DARK THEME STYLES */
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        /* 🔹 Top Navigation Bar */
+        .topnav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e1e1e;
+            padding: 0 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1000;
+        }
+
+        /* 🔹 Menu Bar */
+        .menu-bar {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-bar > li {
+            position: relative;
+        }
+
+        .menu-bar > li > a {
+            display: block;
+            padding: 12px 18px;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .menu-bar > li > a:hover {
+            background-color: #333;
+        }
+
+        /* 🔹 Dropdown Menus */
+        .dropdown-content, .dropdown-submenu-content {
+            display: none;
+            position: absolute;
+            background-color: #2a2a2a;
+            min-width: 210px;
+            z-index: 999;
+            top: 100%;
+            left: 0;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            padding: 5px 0;
+        }
+
+        .dropdown-content li, .dropdown-submenu-content li {
+            position: relative;
+        }
+
+        .dropdown-content a, .dropdown-submenu-content a {
+            color: #e0e0e0;
+            padding: 10px 15px;
+            display: block;
+            text-decoration: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .dropdown-content a:hover, .dropdown-submenu-content a:hover {
+            background-color: #3d3d3d;
+        }
+
+        /* 🔹 Show dropdowns on hover */
+        .dropdown:hover > .dropdown-content {
+            display: block;
+        }
+
+        /* 🔹 Nested Submenus (flyout to right) */
+        .dropdown-submenu-content {
+            top: 0;
+            left: 100%;
+            margin-left: 3px;
+        }
+
+        .dropdown-submenu:hover > .dropdown-submenu-content {
+            display: block;
+        }
+
+        /* 🔹 Right side (User + Logout) */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-photo-nav {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+        .logout-icon {
+            color: #f44336;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .logout-icon:hover {
+            opacity: 0.8;
+        }
+
+        main.content-area {
+            padding: 25px;
+        }
+    </style>
+</head>
+<body>
+
+{% if session.get('user_id') and session.get('empid') %}
+<nav class="topnav">
+    <ul class="menu-bar">
+
+        <!-- 🏠 CEO Desk -->
+        <li><a href="{{ url_for('auth.dashboard') }}">🏠 CEO's Desk</a></li>
+
+        <!-- 🛒 PURCHASE MENU -->
+        <li class="dropdown">
+            <a href="#">🛒 Purchase</a>
+            <ul class="dropdown-content">
+                <li><a href="{{ url_for('purchase.purchase') }}">➕ Raise Indent</a></li>
+                <li><a href="{{ url_for('purchase.purchase_list') }}">📋 Indent List</a></li>
+                <li><a href="{{ url_for('purchase.purchase_pending') }}">🕒 Pending Work</a></li>
+                <li><a href="{{ url_for('purchase.purchase_report') }}">📊 Report</a></li>
+                <li><a href="{{ url_for('purchase.purchase_settings') }}">⚙ Settings</a></li>
+            </ul>
+        </li>
+
+        <!-- 🏗 IMS -->
+        <li class="dropdown">
+            <a href="#">🏗 IMS</a>
+            <ul class="dropdown-content">
+                <li><a href="#">➕ Create</a></li>
+                <li><a href="{{ url_for('inventory.view_inventory') }}">📋 Live Stock</a></li>
+                <li><a href="{{ url_for('inventory.stock_ledger') }}">📊 Stock Ledger</a></li>
+                <li><a href="#">⚙ Settings</a></li>
+            </ul>
+        </li>
+
+        <!-- 🧾 PMS MENU -->
+        <li class="dropdown">
+            <a href="#">🏗️ PMS</a>
+            <ul class="dropdown-content">
+                <!-- 🧾 PMS Submenu -->
+                <li class="dropdown-submenu">
+                    <a href="#">🧾 Planned Works ▸</a>
+                    <ul class="dropdown-submenu-content">
+                        <li><a href="{{ url_for('pms.pms_update') }}">🧾 Planned Work Status</a></li>
+                        <li><a href="{{ url_for('pms.boq_submision_history') }}">🧾 BOQ Submit History</a></li>
+                        <li><a href="{{ url_for('pms.submission_form') }}">🧾 Submission form</a></li>
+                        <!-- <li><a href="{{url_for('organisation_profile.setup_company')}}">Organisation Profile</a></li> -->
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- 💼 SALES -->
+        <li class="dropdown">
+            <a href="#">💼 Sales</a>
+            <ul class="dropdown-content">
+
+                <!-- 🧾 Pre Sales Submenu -->
+                <li class="dropdown-submenu">
+                    <a href="#">🧾 Pre Sales ▸</a>
+                    <ul class="dropdown-submenu-content">
+                        <li><a href="{{ url_for('sales.customer_walkIn') }}">🧾 Walk In form</a></li>
+                        <li><a href="{{ url_for('sales.sales_presales') }}">🧾 Enquiry Allotment</a></li>
+                        <li><a href="{{ url_for('sales.presales_update', leadsid='TEMP') }}">📞 Follow-up</a></li>
+                        <li><a href="{{ url_for('sales.sales_reports') }}">📈 Sales Summary</a></li>
+
+                        <!-- Report Analysis nested submenu -->
+                        <li class="dropdown-submenu">
+                            <a href="#">🧮 Report Analysis ▸</a>
+                            <ul class="dropdown-submenu-content">
+                                <li><a href="{{ url_for('sales.reports_analysis') }}">📊 Source</a></li>
+                                <li><a href="{{ url_for('sales.reports_analysis_calling_status') }}">📞 Calling Status</a></li>
+                                {# Future features below #}
+                                {# <li><a href="{{ url_for('sales.enquiry_allotment') }}">📋 Enquiry Allotment</a></li> #}
+                                <li><a href="{{ url_for('sales.reports_analysis_active_status') }}">🧭 Leads Assignment</a></li>
+                                {# <li><a href="{{ url_for('sales.customer_history') }}">👥 Customer History</a></li> #}
+                                {# <li><a href="{{ url_for('sales.unit_booking') }}">🏠 Unit Booking</a></li> #}
+                                {# <li><a href="{{ url_for('sales.unit_vs_leads') }}">📈 Unit Booking vs Leads</a></li> #}
+                                <li><a href="#">💰 Financial Overview</a></li>
+                                <li><a href="#">🏗 Project Metrics</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- 🧾 Sales Submenu -->
+                <li class="dropdown-submenu">
+                    <a href="#">🧾 Sales ▸</a>
+                    <ul class="dropdown-submenu-content">
+                        <li><a href="{{ url_for('salesdeal.salesdeal_fms_update') }}">📞 Update Followup</a></li>
+                        <li><a href="{{ url_for('sales.sales_presales') }}">🧾 Sales Reports</a></li>
+                        <li><a href="{{ url_for('sales.sales_presales') }}">🧾 Booking</a></li>
+                    </ul>
+                </li>
+                
+                <!-- 🧾 Post Sales Submenu -->
+                <li class="dropdown-submenu">
+                    <a href="#">🧾 Post Sales ▸</a>
+                    <ul class="dropdown-submenu-content">
+                        <li><a href="{{ url_for('sales.sales_presales') }}">🧾 Post Sales Reports</a></li>
+                        <li><a href="{{ url_for('sales.sales_presales') }}">🧾 Agreement</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- 💰 Accounts -->
+        <li><a href="{{ url_for('auth.dashboard') }}">💰 Accounts</a></li>
+
+        <!-- 👥 HR -->
+        <li><a href="{{ url_for('auth.dashboard') }}">👥 HR</a></li>
+
+        <!-- ⚖️ Legal -->
+        <li><a href="{{ url_for('auth.dashboard') }}">⚖️ Legal</a></li>
+
+    </ul>
+
+    <!-- Right User Section -->
+    <div class="nav-right">
+        {% if session.get('empid') %}
+        <img 
+            src="{{ url_for('auth.user_photo', empid=session.get('empid')) }}"
+            alt="User Photo"
+            class="user-photo-nav"
+            title="{{ session.get('empname') }}"
+            onerror="this.onerror=null; this.src={{ url_for('static', filename='images/default_user.png') | tojson }};">
+        {% endif %}
+        <a href="{{ url_for('auth.logout') }}" class="logout-icon" title="Logout">🚪</a>
+    </div>
+</nav>
+{% endif %}
+
+<main class="content-area">
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

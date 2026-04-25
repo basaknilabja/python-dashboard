@@ -1,0 +1,70 @@
+ <!-- HTML – Stock Transaction Ledger -->
+
+{% extends "base.html" %}
+{% block title %}Stock Ledger{% endblock %}
+{% block content %}
+
+<div style="display:flex;justify-content:center;margin:60px auto;width:11in;height:6.5in;">
+<div style="background:#2c1a03;border:2px solid #ff9800;
+box-shadow:0 0 25px rgba(255,152,0,0.4);
+border-radius:12px;padding:18px;width:95%;height:100%;
+display:flex;flex-direction:column;">
+
+<h2 style="color:#ff9800;text-align:center;">📊 Stock Ledger</h2>
+
+<form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+<input type="date" name="from_date">
+<input type="date" name="to_date">
+<input name="part_code" placeholder="Part Code">
+<input name="item_name" placeholder="Item Name">
+<select name="status">
+  <option value="">All</option>
+  <option value="R">Received</option>
+  <option value="I">Issued</option>
+</select>
+<button type="submit" style="background:#ff9800;border:none;padding:5px 10px;">Filter</button>
+</form>
+
+<div style="background:#1b0f02;border:2px solid #ff9800;border-radius:8px;flex-grow:1;overflow:auto;">
+<table style="min-width:100%;border-collapse:collapse;font-size:12.5px;">
+<thead>
+<tr style="background:#ff9800;color:#fff;text-align:center;">
+  <th>Date</th><th>SKU</th><th>Item</th><th>Status</th>
+  <th>In</th><th>Out</th><th>Vendor</th><th>Contractor</th>
+</tr>
+</thead>
+<tbody>
+{% for l in ledger %}
+<tr style="background:#3d2600;color:#f5f5f5;text-align:center;">
+  <td>{{ l.trans_date }}</td>
+  <td>{{ l.part_code }}</td>
+  <td style="text-align:left;padding-left:8px;">{{ l.item_name }}</td>
+  {% if l.status == 'R' %}
+  <td style="font-weight:bold;color:#8bc34a;">
+    RECEIVED
+  </td>
+  {% else %}
+    <td style="font-weight:bold;color:#ff5722;">
+      ISSUED
+    </td>
+  {% endif %}
+
+  <td>{{ l.qty_receive or '-' }}</td>
+  <td>{{ l.qty_issue or '-' }}</td>
+  <td>{{ l.vendor_name or '-' }}</td>
+  <td>{{ l.contractor_name or '-' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<a href="{{ url_for('inventory.view_inventory') }}"
+style="margin-top:10px;background:#ff9800;color:#1b0f02;
+padding:6px 12px;border-radius:6px;text-decoration:none;">
+⬅ Back
+</a>
+
+</div>
+</div>
+{% endblock %}

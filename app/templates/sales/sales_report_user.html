@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body {
+  background: #1c1002;
+  color: #2c1a03;
+  font-family: "Segoe UI", sans-serif;
+}
+.reports-container {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 15px 20px;
+}
+.report-card {
+  flex: 0 0 auto;
+  width: 4in;
+  height: 4in;
+  background: #2c1a03;
+  border: 2px solid #ff9800;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255,152,0,0.4);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.report-header {
+  text-align: center;
+  color: #ffb74d;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.report-chart {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.report-table {
+  background: #3b2500;
+  border-collapse: collapse;
+  width: 100%;
+  color: #fff;
+  font-size: 10px;
+}
+.report-table th, .report-table td {
+  border: 1px solid #ff9800;
+  padding: 3px;
+  text-align: center;
+  cursor: pointer;
+}
+.report-table thead { background: #ff9800; color: #000; }
+.summary-row { display: flex; justify-content: space-evenly; margin-top: 6px; }
+.summary-box {
+  width: 0.8in;
+  height: 0.8in;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: white;
+  cursor: pointer;
+}
+.summary-box.green { background: #4caf50; }
+.summary-box.red { background: #d32f2f; }
+#enquiry-table {
+  margin-top: 25px;
+  width: 95%;
+  border-collapse: collapse;
+  background: #241504;
+  color: #fff;
+  font-size: 13px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#enquiry-table th, #enquiry-table td {
+  border: 1px solid #ff9800;
+  padding: 5px 8px;
+  text-align: center;
+}
+#enquiry-table th { background: #ff9800; color: #000; }
+</style>
+
+<h3 class="text-warning text-center mt-3 mb-2">📊 Pre-Sales Enquiry Summary</h3>
+
+<div style="text-align:center; margin-top:10px; margin-bottom:10px;">
+  <label>From: <input type="date" id="fromDate" style="color:black; padding:2px;"></label>
+  <label>To: <input type="date" id="toDate" style="color:black; padding:2px;"></label>
+</div>
+
+<div class="reports-container">
+  {% for doer, rows in reports.items() %}
+    {% set summary = summaries.get(doer, {}) %}
+    {% set todays_attempts = summary.get('todays_attempts', 0) %}
+    {% set todays_planned = summary.get('todays_planned', 0) %}
+    {% set pending_calls = (todays_planned - todays_attempts) if todays_planned > todays_attempts else 0 %}
+
+    <div class="report-card">
+      <div class="report-header">{{ doer }}</div>
+      <div class="report-chart">
+        <canvas id="chart_{{ loop.index }}" width="260" height="180"></canvas>
+      </div>
+
+      <div style="overflow-y:auto; max-height:90px;">
+        <table class="report-table">
+          <thead><tr><th>Status</th><th>Total</th><th>%</th><th>Today</th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+            <tr onclick="loadDetails('{{ doer }}', '{{ row.status or  }}')">
+              <td>{{ (row.status or '').strip()[:15] }}</td>
+              <td>{{ row.total_count }}</td>
+              <td>{{ row.percentage }}%</td>
+              <td>{{ row.today_count }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-box green" onclick="loadDetails('{{ doer }}', 'Attempts')">
+          <div>{{ todays_attempts }}</div><small>Attempts</small>
+        </div>
+        <div class="summary-box red" onclick="loadDetails('{{ doer }}', 'Pending')">
+          <div>{{ pending_calls }}</div><small>Pending</small>
+        </div>
+      </div>
+
+      <script id="data_{{ loop.index }}" type="application/json">
+        {
+          "statuses": {{ rows | map(attribute='status') | list | tojson }},
+          "total_counts": {{ rows | map(attribute='total_count') | list | tojson }},
+          "today_counts": {{ rows | map(attribute='today_count') | list | tojson }}
+        }
+      </script>
+    </div>
+  {% endfor %}
+</div>
+
+<p class="text-center text-muted mt-3 small">Generated on {{ generated_on }}</p>
+
+<table id="enquiry-table" style="display:none;">
+  <thead>
+    <tr>
+      <th>Lead ID</th>
+      <th>Customer</th>
+      <th>Status</th>
+      <th>Planned Date</th>
+      <th>Actual Date</th>
+      <th>Last Update</th>
+      <th>Remarks</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("script[id^='data_']").forEach((el) => {
+    const idx = el.id.split("_")[1];
+    const data = JSON.parse(el.textContent);
+    const canvas = document.getElementById("chart_" + idx);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const colors = data.statuses.map((_, i) => `hsl(${i*45},80%,55%)`);
+    const todayColors = colors.map(c => c.replace("55%", "70%"));
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.statuses.map(s => (s || '').slice(0,10)),
+        datasets: [
+          { label: "Total", data: data.total_counts, backgroundColor: colors },
+          { label: "Today", data: data.today_counts, backgroundColor: todayColors }
+        ]
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom", labels: { color: "#fff", font: { size: 9 } } } },
+        scales: {
+          x: { ticks: { color: "#fff", font: { size: 8 } } },
+          y: { ticks: { color: "#fff", font: { size: 8 } }, beginAtZero: true }
+        }
+      }
+    });
+  });
+});
+
+async function loadDetails(doer, status) {
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
+  const res = await fetch(`/sales/enquiries?doer=${encodeURIComponent(doer)}&status=${encodeURIComponent(status)}&from=${from}&to=${to}`);
+  const data = await res.json();
+  const table = document.getElementById("enquiry-table");
+  const body = table.querySelector("tbody");
+  body.innerHTML = "";
+  if (!data || data.length === 0) {
+    body.innerHTML = "<tr><td colspan='7'>No records found</td></tr>";
+  } else {
+    data.forEach(r => {
+      body.innerHTML += `
+        <tr>
+          <td>${r.lead_id || ''}</td>
+          <td>${r.customer_name || ''}</td>
+          <td>${r.status || ''}</td>
+          <td>${r.planned || ''}</td>
+          <td>${r.actual || ''}</td>
+          <td>${r.last_update || ''}</td>
+          <td>${r.last_remarks || ''}</td>
+        </tr>`;
+    });
+  }
+  table.style.display = "table";
+  table.scrollIntoView({ behavior: "smooth" });
+}
+</script>
+{% endblock %}

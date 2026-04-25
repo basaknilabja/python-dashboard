@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Purchase | Team Taurus{% endblock %}
+
+{% block content %}
+<div class="purchase-box">
+    <h2>Raise Purchase Indent</h2>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <div class="flash-message">
+                {% for category, msg in messages %}
+                    <p class="flash {{ category }}">{{ msg }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" class="purchase-form">
+        <input type="hidden" name="indent_no" value="{{ indent_no }}">
+        <input type="hidden" name="timestamp1" value="{{ timestamp1 }}">
+
+        <div class="form-group">
+            <label>Indent No:</label>
+            <!-- <input type="text" value="{{ indent_no }}" readonly> -->
+             <input type="text" name="indent_no" value="{{ indent_no }}">
+        </div>
+
+        <div class="form-group">
+            <label>PMS ID:</label>
+            <input type="text" name="pms_id" required>
+        </div>
+
+        <div class="form-group" style="margin:8px 0;">
+            <label>PMS ID</label>
+            <select name="pms_id" required style="width:100%;padding:6px;">
+                <option value="">-- Select PMS ID --</option>
+                {% for p in pms_id %}
+                    <option value="{{ p.pms_id }}">{{ p.pms_id }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Indent Date:</label>
+            <input type="date" name="indent_dt" value="{{ today }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Indent Location:</label>
+            <input type="text" name="indent_location" value="SINGADUAR" required>
+        </div>
+
+        <div class="form-group">
+            <label>Job Reference:</label>
+            <!-- <input type="text" name="job_reference" required> -->
+             <select name="job_reference" required>
+                <option value="">-- Select --</option>
+                <option value="Civil">Civil</option>
+                <option value="Water Proofing">Water Proofing</option>
+                <option value="Door">Door</option>
+                <option value="Window">Window</option>
+                <option value="Electrical">Electrical</option>
+                <option value="CP Fitting">CP Fitting</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Fire">Fire</option>
+             </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description:</label>
+            <input type="text" name="description" required>
+        </div>
+
+        <div class="form-group">
+            <label>Prepared By:</label>
+            <select name="prepared_by" required>
+                <option value="">-- Select --</option>
+                <option value="Biswajit Gayen">Biswajit Gayen</option>
+                <option value="Saikat Ghosh">Rahul De</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>No. of Items:</label>
+            <select name="no_of_items" required>
+                <option value="">-- Select --</option>
+                {% for i in range(1,16) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Indent Photo:</label>
+            <input type="file" name="indent_photo" accept="image/*">
+        </div>
+
+        <div class="form-group">
+            <label>Calculation Sheet:</label>
+            <input type="file" name="calc_sheet" accept=".pdf,.xls,.xlsx,.csv,image/*">
+        </div>
+
+        <button type="submit" class="btn btn-create">➕ Create</button>
+    </form>
+</div>
+{% endblock %}
+
+<p style="margin-top: 1.5rem;">
+    <a href="{{ url_for('auth.dashboard') }}" class="btn-secondary">← Back to Dashboard</a>
+</p>
+

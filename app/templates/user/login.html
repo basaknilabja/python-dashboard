@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Team Taurus{% endblock %}
+
+{% block content %}
+
+<div class="login-box" role="main">
+    <!-- preview area (hidden until success) -->
+    <div id="preview-area" style="text-align:center; margin-bottom:12px; display:none;">
+        <img id="employee-photo" src="" alt="Employee photo" style="width:100px; height:100px; object-fit:cover; border-radius:50%; border:2px solid #fff;">
+        <p id="pwmsg" style="margin-top:8px; font-weight:600;"></p>
+    </div>
+
+    <h1 style="text-align:center; color:#fff; margin-bottom:6px;">Sign in to your account</h1>
+    <p style="text-align:center; color:#ffd8a6;">Enter your credentials to access your dashboard</p>
+
+    <!-- Flash messages from server -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <div class="flash-message" id="flash-box">
+                {% for category, msg in messages %}
+                    <p class="flash {{ category }}">{{ msg }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" id="login-form" autocomplete="off">
+        <div class="form-group">
+            <label for="user_id" style="color:#ffd8a6;">User ID:</label>
+            <input type="text" name="user_id" id="user_id" placeholder="Enter your User ID" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password" style="color:#ffd8a6;">Password:</label>
+            <input type="password" name="password" id="password" placeholder="Enter Password" required>
+        </div>
+
+        <div class="form-group-remember-me" style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="color:#ffd8a6;">
+                <input type="checkbox" name="remember" id="remember"> Remember me
+            </label>
+            <a href="#" style="color:#00b4ff;">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn" id="login-btn">Sign In</button>
+    </form>
+
+    <p style="text-align:center; margin-top:15px;color:#ffd8a6">
+        New user? <a href="{{ url_for('auth.register') }}" style="color:#00b4ff">Register here</a>
+    </p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const userInput = document.getElementById("user_id");
+    const pwInput = document.getElementById("password");
+    const previewArea = document.getElementById("preview-area");
+    const photoImg = document.getElementById("employee-photo");
+    const pwmsg = document.getElementById("pwmsg");
+    const flashBox = document.getElementById("flash-box");
+
+    // Helper to clear preview/message
+    function clearPreview() {
+        previewArea.style.display = "none";
+        photoImg.src = "";
+        pwmsg.textContent = "";
+    }
+
+    // clear server flash box when user edits fields
+    [userInput, pwInput].forEach(el => {
+        el.addEventListener("input", () => {
+            if (flashBox) flashBox.innerHTML = "";
+        });
+    });
+
+    // On blur of password (you can change to 'input' for realtime)
+    pwInput.addEventListener("blur", async function () {
+        const uid = userInput.value.trim();
+        const pwd = pwInput.value;
+        if (!uid || !pwd) {
+            clearPreview();
+            return;
+        }
+
+        // Build form data and POST to check_password endpoint
+        const fd = new FormData();
+        fd.append("user_id", uid);
+        fd.append("password", pwd);
+
+        try {
+            const res = await fetch("{{ url_for('auth.check_password') }}", {
+                method: "POST",
+                body: fd,
+            });
+            const data = await res.json();
+
+            if (data.status === "success") {
+                // show photo and message
+                photoImg.src = data.photo_url;
+                pwmsg.textContent = data.message || "Password matched. Press Sign in.";
+                pwmsg.style.color = "lightgreen";
+                previewArea.style.display = "block";
+            } else {
+                // error case: hide photo and show message
+                clearPreview();
+                pwmsg.textContent = data.message || "Invalid credentials";
+                pwmsg.style.color = "orange";
+                previewArea.style.display = "block";
+            }
+        } catch (err) {
+            console.error("Error calling check_password:", err);
+            clearPreview();
+        }
+    });
+
+    // If user changes user_id, clear preview
+    userInput.addEventListener("input", clearPreview);
+});
+</script>
+{% endblock %}

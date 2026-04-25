@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="text-align:center;">📊 Active Status Report</h2>
+
+<form method="get" action="/sales/reports_analysis_active_status"
+      style="max-width:400px;margin:20px auto;padding:20px;border:1px solid #ccc;border-radius:10px;">
+  
+  <label>Start Date</label>
+  <input type="date" name="start_date" required class="form-control">
+
+  <label>End Date</label>
+  <input type="date" name="end_date" required class="form-control">
+
+  <br>
+  <button style="padding:8px 18px;background:green;color:white;border:none;border-radius:5px;">
+    Download Report
+  </button>
+</form>
+{% endblock %}

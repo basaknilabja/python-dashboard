@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body {
+  background: #1b0f02;
+  color: #fff;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.reports-container {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 15px 20px;
+}
+
+.report-card, .consolidated-card {
+  flex: 0 0 auto;
+  width: 4in;
+  height: 4in;
+  background: #2c1a03;
+  border: 2px solid #ff9800;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255,152,0,0.4);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.report-header {
+  text-align: center;
+  color: #ffb74d;
+  font-weight: bold;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.report-table th, .report-table td {
+  border: 1px solid #ff9800;
+  padding: 3px;
+  text-align: center;
+  color: #fff;
+}
+.report-table thead {
+  background: #ff9800;
+  color: #000;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 4px;
+}
+.summary-box {
+  width: 1in;
+  height: 1in;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+}
+.summary-box.green { background: #4caf50; cursor: pointer; }
+.summary-box.red { background: #d32f2f; cursor: pointer; }
+
+#details-table {
+  margin: 25px auto;
+  width: 90%;
+  border-collapse: collapse;
+  display: none;
+  background: #2c1a03;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(255,152,0,0.3);
+}
+#details-table th, #details-table td {
+  border: 1px solid #ff9800;
+  padding: 6px;
+  text-align: center;
+  color: #fff;
+}
+#details-table thead {
+  background: #ff9800;
+  color: #000;
+}
+#details-table tbody tr:hover {
+  background: rgba(255,152,0,0.15);
+  cursor: pointer;
+}
+.selected-row { background: rgba(255,255,255,0.15) !important; }
+</style>
+
+<h3 class="text-warning text-center mt-3 mb-3">📊 Pre-Sales Enquiry Summary</h3>
+
+<div class="reports-container">
+  {% for doer, rows in reports.items() %}
+  {% set summary = summaries.get(doer, {}) %}
+  {% set todays_attempts = summary.todays_attempts or 0 %}
+  {% set todays_planned = summary.todays_planned or 0 %}
+  {% set pending_calls = (todays_planned - todays_attempts) if todays_planned > todays_attempts else 0 %}
+
+  <div class="report-card">
+    <div class="report-header">{{ doer }}</div>
+    <canvas id="chart_{{ loop.index }}" height="130"></canvas>
+
+    <div style="overflow-y:auto; max-height:90px;">
+      <table class="report-table">
+        <thead><tr><th>Status</th><th>Total</th><th>%</th><th>Today</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+          <tr onclick="fetchStatusDetails('{{ row.status }}', '{{ doer }}')" style="cursor:pointer;">
+            <td>{{ row.status }}</td>
+            <td>{{ row.total_count }}</td>
+            <td>{{ row.percentage }}%</td>
+            <td>{{ row.today_count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-box green" onclick="fetchStatusDetails('Attempts', '{{ doer }}')">
+        <div>{{ todays_attempts }}</div><small>Attempts</small>
+      </div>
+      <div class="summary-box red" onclick="fetchStatusDetails('Pending', '{{ doer }}')">
+        <div>{{ pending_calls }}</div><small>Pending</small>
+      </div>
+    </div>
+
+    <script id="data_{{ loop.index }}" type="application/json">
+      {
+        "statuses": {{ rows | map(attribute='status') | list | tojson }},
+        "total_counts": {{ rows | map(attribute='total_count') | list | tojson }},
+        "today_counts": {{ rows | map(attribute='today_count') | list | tojson }}
+      }
+    </script>
+  </div>
+  {% endfor %}
+
+  {% if conversions %}
+  <div class="consolidated-card">
+    <div class="report-header">Monthly Conversion Ratio</div>
+    <canvas id="conversionChart"></canvas>
+    <div style="overflow-y:auto; max-height:120px;">
+      <table class="report-table">
+        <thead>
+          <tr><th>Month-Year</th><th>Doer</th><th>Total Enquiries</th><th>Active</th><th>Conversion %</th></tr>
+        </thead>
+        <tbody>
+        {% for month, items in conversions.items() %}
+          {% for r in items %}
+          <tr onclick="fetchStatusDetails('Active', 'All')" style="cursor:pointer;">
+            <td>{{ month }}</td>
+            <td>{{ r.doer }}</td>
+            <td>{{ r.total_enquiries }}</td>
+            <td>{{ r.total_active }}</td>
+            <td>{{ r.conversion_ratio }}%</td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Dynamic Details Table -->
+<table id="details-table">
+  <thead>
+    <tr>
+      <th>Lead ID</th>
+      <th>Customer</th>
+      <th>Doer</th>
+      <th>Status</th>
+      <th>Planned</th>
+      <th>Actual</th>
+      <th>Last Status</th>
+      <th>Last Remark</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<p class="text-center text-muted mt-3 small">
+  Generated on {{ generated_on }}
+</p>
+
+<!-- @ts-nocheck -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Initialize each doer chart
+  document.querySelectorAll("script[id^='data_']").forEach((el, i) => {
+    const data = JSON.parse(el.textContent);
+    const ctx = document.getElementById("chart_" + (i + 1)).getContext("2d");
+    const colors = data.statuses.map((_, k) => `hsl(${k * 45},80%,55%)`);
+    const todayColors = colors.map(c => c.replace("55%", "70%"));
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.statuses,
+        datasets: [
+          { label: "Total", data: data.total_counts, backgroundColor: colors },
+          { label: "Today", data: data.today_counts, backgroundColor: todayColors }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: { labels: { color: "#fff" } },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.formattedValue}` } }
+        },
+        scales: {
+          x: { ticks: { color: "#fff" } },
+          y: { ticks: { color: "#fff" }, beginAtZero: true }
+        }
+      }
+    });
+  });
+
+  // Consolidated conversion chart
+  const convEl = document.getElementById("conversionChart");
+  if (convEl) {
+    const months = JSON.parse('{{ conversions.keys() | list | tojson | safe }}');
+    const conversions = JSON.parse('{{ conversions | tojson | safe }}');
+    const datasets = [];
+    const colors = ['#ff9800','#4caf50','#03a9f4','#e91e63','#9c27b0','#cddc39','#00bcd4','#8bc34a'];
+    const doers = {};
+
+    for (const [month, items] of Object.entries(conversions)) {
+      items.forEach(r => {
+        if (!doers[r.doer]) doers[r.doer] = [];
+        doers[r.doer].push(r.conversion_ratio || 0);
+      });
+    }
+
+    Object.keys(doers).forEach((d, idx) => {
+      datasets.push({
+        label: d,
+        data: doers[d],
+        backgroundColor: colors[idx % colors.length]
+      });
+    });
+
+    new Chart(convEl, {
+      type: "bar",
+      data: { labels: months, datasets },
+      options: {
+        plugins: { legend: { labels: { color: "#fff" } } },
+        scales: {
+          x: { ticks: { color: "#fff" } },
+          y: { ticks: { color: "#fff" }, beginAtZero: true }
+        }
+      }
+    });
+  }
+});
+
+// Fetch status details dynamically
+function fetchStatusDetails(status, doer = "All") {
+  $("tr").removeClass("selected-row");
+  event?.target?.closest("tr")?.classList?.add("selected-row");
+
+  $.ajax({
+    url: "{{ url_for('sales.status_details') }}",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({ status, doer }),
+    success: function(data) {
+      const tbody = $("#details-table tbody");
+      tbody.empty();
+      if (!data.length) {
+        $("#details-table").hide();
+        return;
+      }
+
+      data.forEach(row => {
+        const planned = row.planned ? new Date(row.planned).toLocaleString('en-GB', {
+          day: '2-digit', month: '2-digit', year: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        }) : '';
+        const actual = row.actual ? new Date(row.actual).toLocaleString('en-GB', {
+          day: '2-digit', month: '2-digit', year: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        }) : '';
+
+        tbody.append(`
+          <tr>
+            <td>${row.lead_id || ''}</td>
+            <td>${row.customer_name || ''}</td>
+            <td>${row.doer || ''}</td>
+            <td>${row.status || ''}</td>
+            <td>${planned}</td>
+            <td>${actual}</td>
+            <td>${row.last_status || ''}</td>
+            <td>${row.last_remarks || ''}</td>
+          </tr>
+        `);
+      });
+      $("#details-table").show();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    },
+    error: () => alert("Error loading details.")
+  });
+}
+</script>
+
+{% endblock %}

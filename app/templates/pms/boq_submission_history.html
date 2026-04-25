@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}BOQ Submission History{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:center;margin:60px auto;width:11in;">
+
+  <div style="
+    background:#2c1a03;
+    border:2px solid #ff9800;
+    box-shadow:0 0 25px rgba(255,152,0,0.4);
+    border-radius:12px;
+    padding:22px;
+    width:70%;
+  ">
+
+    <h2 style="
+      color:#ff9800;
+      text-align:center;
+      margin-bottom:22px;
+      font-family:'Segoe UI',sans-serif;
+    ">
+      📦 BOQ Submission History
+    </h2>
+
+    {% if boqEntry %}
+    <div style="overflow:auto;">
+
+      <table style="
+        width:max-content;
+        min-width:100%;
+        border-collapse:collapse;
+        color:#fff;
+        font-size:13px;
+        font-family:'Segoe UI',sans-serif;
+        text-align: center;
+      ">
+        <thead>
+          <tr style="background:linear-gradient(135deg,#ff9800,#ffb84d);">
+            <th style="padding:8px;border:1px solid #3a2200;">PMS Work ID</th>
+            <th style="padding:8px;border:1px solid #3a2200;">Planned Work</th>
+            <th style="padding:8px;border:1px solid #3a2200;">BOQ</th>
+            <th style="padding:8px;border:1px solid #3a2200;">Actual Date</th>
+            <th style="padding:8px;border:1px solid #3a2200;">Submitted By</th>
+            <th style="padding:8px;border:1px solid #3a2200;">Contractor</th>
+            <th style="padding:8px;border:1px solid #3a2200;text-align:center;">Attachment</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in boqEntry %}
+          <tr style="background:#3d2600;">
+            <td style="padding:6px;border:1px solid #4d2b00;white-space:nowrap;">
+              {{ row.pmsworkid }}
+            </td>
+
+            <td style="padding:6px;border:1px solid #4d2b00;white-space:nowrap;">
+              {{ row.plannedworkname }}
+            </td>
+
+            <td style="padding:6px;border:1px solid #4d2b00;text-align:right;">
+              {{ row.boq }}
+            </td>
+
+            <td style="padding:6px;border:1px solid #4d2b00;white-space:nowrap;">
+              {{ row.actual or '-' }}
+            </td>
+
+            <td style="padding:6px;border:1px solid #4d2b00;">
+              {{ row.submitBy }}
+            </td>
+
+            <td style="padding:6px;border:1px solid #4d2b00;">
+              {{ row.contractor or '-' }}
+            </td>
+
+            <!-- ✅ Attachment link -->
+            <td style="padding:6px;border:1px solid #4d2b00;text-align:center;">
+              {% if row.id %}
+                <a href="{{ url_for('pms.download_boq_attachment', entry_id=row.id) }}"
+                   style="color:#ffcc80;text-decoration:none;font-weight:600;">
+                  📎 View Attachment
+                </a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+    {% else %}
+      <p style="text-align:center;color:#ffcc80;margin-top:20px;">
+        No BOQ submission history found.
+      </p>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

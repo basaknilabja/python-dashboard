@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Pending Purchase Tasks{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f5f5f5;
+    }
+
+    .container-flex {
+        display: flex;
+        justify-content: space-between;
+        padding: 30px;
+        gap: 20px;
+    }
+
+    /* LEFT — TABLE CARD */
+    .pending-card {
+        width: 70%;
+        background: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.18);
+    }
+
+    .pending-card h2 {
+        text-align: center;
+        color: #1976d2;
+        margin-bottom: 15px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    table thead {
+        background: #1976d2;
+        color: #fff;
+    }
+
+    table th, table td {
+        padding: 6px;
+        text-align: center;
+        border: 1px solid #ccc;
+        vertical-align: middle;
+    }
+
+    tr:nth-child(even) {
+        background: #fafafa;
+    }
+
+    tr:hover {
+        background: #e3f2fd;
+    }
+
+    /* RIGHT — 4x4 FORM BOX */
+    .update-box {
+        width: 4in;
+        height: 4in;
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    }
+
+    .update-box h3 {
+        text-align: center;
+        color: #1976d2;
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+
+    .update-box form label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .update-box input,
+    .update-box select,
+    .update-box textarea {
+        width: 100%;
+        padding: 6px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+
+    .update-box button {
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .update-box button:hover {
+        opacity: 0.9;
+    }
+</style>
+
+<div class="container-flex">
+
+    <!-- LEFT SIDE TABLE -->
+    <div class="pending-card">
+        <h2>🕒 Pending Purchase Work</h2>
+
+        {% if purchases %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Unique ID</th>
+                    <th>Step</th>
+                    <th>How to Do</th>
+                    <th>Planned</th>
+                    <th>Remarks</th>
+                    <th>Doer</th>
+                    <th>Attachment 1</th>
+                    <th>Attachment 2</th>
+                    <th>Tools</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for p in purchases %}
+                <tr onclick="loadForm('{{ p.unique_id }}', '{{ p.step_name }}')" style="cursor:pointer;">
+                    <td>{{ p.unique_id }}</td>
+                    <td>{{ p.step_name }}</td>
+                    <td>{{ p.how_to_do or '' }}</td>
+                    <td>{{ p.planned_fmt or '' }}</td>
+                    <td>{{ p.remarks or '' }}</td>
+                    <td>{{ p.doer or '' }}</td>
+
+                    <td>
+                        {% if p.attachment1 %}
+                            <a href="{{ url_for('purchase.doer_attachment', unique_id=p.unique_id, which=1) }}" target="_blank">📎 File 1</a>
+                        {% else %}—{% endif %}
+                    </td>
+
+                    <td>
+                        {% if p.attachment2 %}
+                            <a href="{{ url_for('purchase.doer_attachment', unique_id=p.unique_id, which=2) }}" target="_blank">📎 File 2</a>
+                        {% else %}—{% endif %}
+                    </td>
+
+                    <td>{{ p.tools_name or '' }}</td>
+
+                    <td>
+                        <button onclick="loadForm('{{ p.unique_id }}', '{{ p.step_name }}')">Update</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No pending work found.</p>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT SIDE FORM (4x4 BOX) -->
+    <div class="update-box">
+        <h3>Update Task</h3>
+
+        <form id="updateForm" method="POST" enctype="multipart/form-data">
+
+            <label>Unique ID</label>
+            <input type="text" id="unique_id" name="unique_id" readonly>
+
+            <label>Step Name</label>
+            <input type="text" id="step_name" name="step_name" readonly>
+
+            <label>Status</label>
+            <select name="status" id="status">
+                <option value="">-- select --</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Hold">Hold</option>
+                <option value="Cancel">Cancel</option>
+                <option value="NA">NA</option>
+            </select>
+
+            <label>Remarks</label>
+            <textarea name="remarks" id="remarks" rows="2"></textarea>
+
+            <label>Attachment</label>
+            <input type="file" name="file1" id="file1">
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadForm(id, step) {
+    document.getElementById("unique_id").value = id;
+    document.getElementById("step_name").value = step;
+}
+</script>
+
+{% endblock %}

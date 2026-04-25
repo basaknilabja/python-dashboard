@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body{
+    background:#1b0f02;
+    color:#fff;
+    font-family:"Segoe UI",sans-serif;
+}
+.main-wrapper{
+    display:flex;
+    gap:20px;
+    padding:20px;
+}
+.table-box{
+    width:70%;
+    background:rgba(255,152,0,0.15);
+    border:2px solid #ff9800;
+    border-radius:12px;
+    padding:15px;
+}
+.form-box{
+    width:30%;
+    background:#2c1a03;
+    border:2px solid #ff9800;
+    border-radius:12px;
+    padding:15px;
+}
+.table-box th{
+    background:#ff9800;
+    color:#000;
+}
+.table-box td, .table-box th{
+    border:1px solid #ff9800;
+    padding:6px;
+    text-align:center;
+}
+.form-box input,
+.form-box select,
+.form-box textarea{
+    width:100%;
+    background:rgba(255,152,0,0.2);
+    color:#fff;
+    border:1px solid #ff9800;
+    border-radius:6px;
+    padding:6px;
+    margin-bottom:8px;
+}
+.form-box select option{
+    background:#2c1a03;
+    color:#fff;
+}
+button{
+    background:#ff9800;
+    color:#000;
+    border:none;
+    padding:8px;
+    border-radius:6px;
+    cursor:pointer;
+}
+.hide{display:none;}
+</style>
+
+<div class="main-wrapper">
+
+<!-- ================= LEFT TABLE ================= -->
+<div class="table-box">
+    <h3 style="text-align:center;color:#ffb74d">Pending Sales FMS</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Lead</th>
+                <th>Step</th>
+                <th>Status</th>
+                <th>Planned</th>
+                <th>Project</th>
+                <th>Select</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in pending_list %}
+            <tr onclick="selectRow('{{ r.id }}','{{ r.unique_id }}','{{ r.project }}')">
+                <td>{{ r.unique_id }}</td>
+                <td>{{ r.step_name }}</td>
+                <td>{{ r.last_status }}</td>
+                <td>{{ r.planned }}</td>
+                <td>{{ r.project }}</td>
+                <td><button type="button">Select</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= RIGHT FORM ================= -->
+<div class="form-box">
+    <h3 style="text-align:center;color:#ffb74d">Update Sales</h3>
+
+    <form id="updateForm" enctype="multipart/form-data">
+
+        <!-- hidden -->
+        <input type="hidden" name="doer_pending_id" id="dp_id">
+        <input type="hidden" name="unique_id" id="unique_id">
+        <input type="hidden" name="project" id="project">
+
+        <label>Status</label>
+        <select name="status" id="status" required>
+            <option value="">--Select--</option>
+            <option value="revisit">Revisit</option>
+            <option value="ongoing call">Ongoing Call</option>
+            <option value="negotiation">Negotiation</option>
+            <option value="indecisive">Indecisive</option>
+            <option value="booking">Booking</option>
+        </select>
+
+        <label>Remarks</label>
+        <textarea name="remarks"></textarea>
+
+        <!-- TAT -->
+        <div id="tatField" class="hide">
+            <label>TAT (Days)</label>
+            <input type="number" name="tat" min="0">
+        </div>
+
+        <!-- BOOKING -->
+        <div id="bookingFields" class="hide">
+
+            <label>Customer Name</label>
+            <input name="customername" required>
+
+            <label>Phone</label>
+            <input name="phoneno" required>
+
+            <label>WhatsApp</label>
+            <input name="wtsp_no">
+
+            <label>Booking Date</label>
+            <input type="date" name="booking">
+
+            <label>Email</label>
+            <input type="email" name="email">
+
+            <label>Flat No</label>
+            <select name="flat_no" id="flat_no" required>
+                <option value="">--Select Flat--</option>
+            </select>
+
+            <label>Rate</label>
+            <input name="rate">
+
+            <label>Flat Price</label>
+            <input name="flat_price">
+
+            <label>Car Parking</label>
+            <select name="car_parking">
+                <option value="Covered">Covered</option>
+                <option value="Open">Open</option>
+                <option value="No">No</option>
+            </select>
+
+            <label>Initial Amount</label>
+            <input name="initial_amt">
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+</div>
+
+<script>
+/* ================= ROW SELECT ================= */
+function selectRow(id, uid, project){
+    document.getElementById("dp_id").value = id;
+    document.getElementById("unique_id").value = uid;
+    document.getElementById("project").value = project;
+    console.log("✅ Selected Project:", project);
+}
+
+/* ================= STATUS CHANGE ================= */
+document.getElementById("status").addEventListener("change", function(){
+    const status = this.value;
+    const project = document.getElementById("project").value;
+
+    document.getElementById("tatField").classList.add("hide");
+    document.getElementById("bookingFields").classList.add("hide");
+
+    if(["revisit","ongoing call","negotiation","indecisive"].includes(status)){
+        document.getElementById("tatField").classList.remove("hide");
+    }
+
+    if(status === "booking"){
+        if(!project){
+            alert("❌ Please select a lead first");
+            this.value="";
+            return;
+        }
+        document.getElementById("bookingFields").classList.remove("hide");
+        loadFlats(project);
+    }
+});
+
+/* ================= LOAD FLATS ================= */
+async function loadFlats(project){
+    const flatSelect = document.getElementById("flat_no");
+    flatSelect.innerHTML = "<option>Loading...</option>";
+
+    try{
+        const res = await fetch(`/salesdeal/flats/${project}`);
+        const flats = await res.json();
+
+        flatSelect.innerHTML = `<option value="">--Select Flat--</option>`;
+        flats.forEach(f=>{
+            flatSelect.innerHTML += `<option value="${f.flat_no}">${f.flat_no}</option>`;
+        });
+
+        console.log("📦 Flats loaded:", flats);
+    }catch(err){
+        console.error(err);
+        flatSelect.innerHTML = `<option>Error loading flats</option>`;
+    }
+}
+
+/* ================= SUBMIT ================= */
+document.getElementById("updateForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const res = await fetch("",{method:"POST",body:new FormData(e.target)});
+    const r = await res.json();
+    alert(r.message);
+    if(r.success) location.reload();
+});
+</script>
+
+{% endblock %}

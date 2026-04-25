@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sales.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="followup-container">
+  <div class="followup-box">
+    <h2>📞 Presales Follow-Up</h2>
+    <p>Update your follow-up details for Lead ID <strong>{{ lead.leadsid }}</strong></p>
+
+    <form method="POST" class="followup-form">
+      <!-- Lead Details Section -->
+      <div class="lead-summary">
+        <div><strong>Name:</strong> {{ lead.name }}</div>
+        <div><strong>Contact:</strong> {{ lead.contactno }}</div>
+        <div><strong>Project:</strong> {{ lead.project }}</div>
+        <div><strong>Flat Type:</strong> {{ lead.flat_type }}</div>
+      </div>
+
+      <!-- Follow-Up Inputs -->
+      <div class="form-group">
+        <label for="status1">Call Status</label>
+        <select name="status1" id="status1" required>
+          <option value="">-- Select Status --</option>
+          <option>Switched off</option>
+          <option>Disconnected</option>
+          <option>Untouched</option>
+          <option>Duplicate call</option>
+          <option>Wrong no</option>
+          <option>Budget mismatch</option>
+          <option>Location mismatch</option>
+          <option>Vendor</option>
+          <option>Ongoing communication</option>
+          <option>Ask to call back later</option>
+          <option>Site visit scheduled</option>
+          <option>Active</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="remarks1">Remarks</label>
+        <textarea name="remarks1" id="remarks1" rows="3" placeholder="Enter any remarks..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="whatsapp_send1">WhatsApp Sent?</label>
+        <select name="whatsapp_send1" id="whatsapp_send1">
+          <option value="">-- Select --</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="tat1">Call Again After (Days)</label>
+        <input type="number" id="tat1" name="tat1" min="0" placeholder="e.g. 2">
+      </div>
+
+      <div class="form-group">
+        <label for="site_visit_datetime">Site Visit Date & Time</label>
+        <input type="datetime-local" id="site_visit_datetime" name="site_visit_datetime">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">💾 Save Follow-Up</button>
+        <a href="{{ url_for('sales.presales_list') }}" class="btn-secondary">← Back to List</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

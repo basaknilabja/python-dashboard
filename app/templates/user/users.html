@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Registered Users{% endblock %}
+
+{% block content %}
+<div class="users-box">
+    <h2>Registered Users</h2>
+
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>User ID</th>
+                <th>Photo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.empid }}</td>
+                <td>{{ user.empname }}</td>
+                <td>{{ user.user_id }}</td>
+                <td>
+                    {% if user.photo %}
+                        <img src="{{ url_for('auth.user_photo', empid=user.empid) }}" alt="photo" class="user-photo">
+                    {% else %}
+                        No Photo
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

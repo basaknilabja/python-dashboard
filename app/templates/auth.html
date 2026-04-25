@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Auth{% endblock %}
+{% block content %}
+<h2>Authentication Page</h2>
+<p>This is a placeholder. You can add custom authentication info here.</p>
+<nav>
+            <a href="/">Home</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
+        </nav>
+{% endblock %}

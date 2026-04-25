@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Calling Status Report{% endblock %}
+
+{% block content %}
+<h2>📞 Calling Status Report</h2>
+
+<div style="background:#1e1e1e; padding:20px; border-radius:8px; width:380px;">
+    <form method="GET" action="{{ url_for('sales.reports_analysis_calling_status') }}">
+
+        <label>From Date:</label>
+        <input type="date" name="start_date" required
+               style="padding:8px; width:100%; margin-bottom:12px;">
+
+        <label>To Date:</label>
+        <input type="date" name="end_date" required
+               style="padding:8px; width:100%; margin-bottom:12px;">
+
+        <button type="submit"
+                style="padding:10px 20px; background:#4caf50; color:white; border:none; border-radius:5px;">
+            📄 Download PDF
+        </button>
+    </form>
+</div>
+{% endblock %}
+

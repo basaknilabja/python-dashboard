@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Presales Follow-Up Update{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sales.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="content-area">
+  <div class="form-card">
+    <h2 style="color:#ff9800; text-align:center;">📞 Presales Follow-Up</h2>
+
+    {% if lead %}
+    <form method="POST" class="update-form">
+      <!-- Basic Lead Info -->
+      <div class="lead-info">
+        <p><strong>Lead ID:</strong> {{ lead.leadsid }}</p>
+        <p><strong>Name:</strong> {{ lead.name }}</p>
+        <p><strong>Contact:</strong> {{ lead.contactno }}</p>
+        <p><strong>Email:</strong> {{ lead.emailid }}</p>
+        <p><strong>Project:</strong> {{ lead.project }}</p>
+        <p><strong>Flat Type:</strong> {{ lead.flat_type }}</p>
+      </div>
+
+      <hr>
+
+      <!-- Follow-Up Update Section -->
+      <div class="form-group">
+        <label>Status:</label>
+        <select name="status1" required>
+          <option value="">--Select--</option>
+          <option value="Switched off">Switched off</option>
+          <option value="Disconnected">Disconnected</option>
+          <option value="Untouched">Untouched</option>
+          <option value="Duplicate call">Duplicate call</option>
+          <option value="Wrong no">Wrong no</option>
+          <option value="Budget mismatch">Budget mismatch</option>
+          <option value="Location mismatch">Location mismatch</option>
+          <option value="Vendor">Vendor</option>
+          <option value="Ongoing communication">Ongoing communication</option>
+          <option value="Ask to call back later">Ask to call back later</option>
+          <option value="Site visit scheduled">Site visit scheduled</option>
+          <option value="Active">Active</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Remarks:</label>
+        <textarea name="remarks1" rows="3" placeholder="Enter your remarks..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>WhatsApp Sent:</label>
+        <select name="whatsapp_send1">
+          <option value="">--Select--</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Call Again After (Days):</label>
+        <input type="number" name="tat1" min="0" max="60" placeholder="Enter days for next call">
+      </div>
+
+      <div class="form-group">
+        <label>Site Visit Date/Time:</label>
+        <input type="datetime-local" name="site_visit_datetime">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">Update Follow-Up</button>
+        <a href="{{ url_for('sales.presales_list') }}" class="btn-secondary">⬅ Back to List</a>
+      </div>
+    </form>
+
+    {% else %}
+      <p style="color:red; text-align:center;">No lead data found.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

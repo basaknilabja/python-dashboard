@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}PMS Planned Work{% endblock %}
+
+{% block content %}
+<div style="
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  margin:60px auto;
+  padding:15px;
+  width:11in;
+  height:6.5in;
+">
+
+  <div style="
+    background:#2c1a03;
+    border:2px solid #ff9800;
+    box-shadow:0 0 25px rgba(255,152,0,0.4);
+    border-radius:12px;
+    padding:18px;
+    width:80%;
+    height:100%;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  ">
+
+    <h2 style="
+      color:#ff9800;
+      text-align:center;
+      margin-bottom:15px;
+      font-size:18px;
+    ">
+      🏗️ PMS Planned Work
+    </h2>
+
+    <!-- 🔽 Planned Work Selector -->
+    <form method="GET"
+          action="{{ url_for('pms.pms_update') }}"
+          style="margin-bottom:15px;display:flex;align-items:center;gap:10px;">
+
+      <label for="planWork"
+             style="font-weight:600;color:#ffcc80;white-space:nowrap;">
+        Planned Work
+      </label>
+
+      <select name="planWork"
+              id="planWork"
+              onchange="this.form.submit()"
+              style="padding:6px;width:220px;">
+        <option value="">-- Select Planned Work --</option>
+
+        {% for p in planWork %}
+          <option value="{{ p.plannedworkname }}"
+            {% if p.plannedworkname == selected_plan %}selected{% endif %}>
+            {{ p.plannedworkname }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
+
+    <!-- 📊 TABLE -->
+    {% if pmsWork and pmsWork|length > 0 %}
+    <div style="
+      background:#1b0f02;
+      border:2px solid #ff9800;
+      border-radius:8px;
+      flex-grow:1;
+      overflow:auto;
+    ">
+
+      <table style="
+        width:max-content;
+        min-width:100%;
+        border-collapse:collapse;
+        font-size:13px;
+      ">
+        <thead>
+          <tr style="background:#ff9800;color:#fff;">
+            <th style="padding:6px;">Planned Date</th>
+            <th style="padding:6px;">Actual Date</th>
+            <th style="padding:6px;">BOQ</th>
+            <th style="padding:6px;">Pile Mark No</th>
+            <th style="padding:6px;">Delay Days</th>
+            <th style="padding:6px;">Planned BOQ</th>
+            <th style="padding:6px;">Planned Work</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in pmsWork %}
+          <tr style="background:#3d2600;color:#f5f5f5;text-align:center;">
+            <td style="padding:5px;">{{ row.planned or '-' }}</td>
+            <td style="padding:5px;">{{ row.actual or '-' }}</td>
+            <td style="padding:5px;">{{ row.boq or '-' }}</td>
+            <td style="padding:5px;">{{ row.pilemarkno or '-' }}</td>
+            <td style="padding:5px;">{{ row.delaydays or '-' }}</td>
+            <td style="padding:5px;">{{ row.plannedboq or '-' }}</td>
+            <td style="padding:5px;">{{ row.plannedworkname or '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+
+    {% else %}
+      {% if selected_plan %}
+        <p style="color:#ffcc80;text-align:center;margin-top:15px;">
+          No records found for selected planned work.
+        </p>
+      {% else %}
+        <p style="color:#ffcc80;text-align:left;margin-top:15px;">
+          Please select a planned work from list.
+        </p>
+      {% endif %}
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

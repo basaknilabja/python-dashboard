@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* PAGE BACKGROUND */
+body {
+    background: #1b0f02 !important;
+    font-family: "Segoe UI", sans-serif;
+    color: #fff;
+}
+
+/* TITLE */
+.page-title {
+    text-align: center;
+    color: #ffb74d;
+    margin-bottom: 20px;
+}
+
+/* BACK BUTTON */
+.back-btn {
+    margin-bottom: 10px;
+}
+
+/* OUTER TABLE BOX */
+.table-responsive {
+    background: rgba(255,152,0,0.2);
+    border-radius: 12px;
+    border: 2px solid #ff9800;
+    box-shadow: 0 0 12px rgba(255,152,0,0.4);
+    width: 100%;                        /* 🔥 Fit inside dashboard width */
+    overflow-x: auto;
+    padding: 0;
+}
+
+/* TABLE */
+table {
+    background: #2c1a03 !important;
+    color: #fff !important;
+    width: 100% !important;              /* 🔥 Full width */
+}
+
+/* TABLE CELLS */
+table th, table td {
+    border: 1px solid #ff9800 !important;
+    padding: 6px 10px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 🔥 Reduce column widths to 1/3 */
+.col-narrow {
+    width: 90px !important;     /* PMS ID */
+}
+.col-narrow2 {
+    width: 90px !important;     /* Indent No */
+}
+.col-narrow3 {
+    width: 110px !important;    /* Location */
+}
+
+/* Description wraps */
+.description-cell {
+    white-space: normal !important;
+    max-width: 260px;
+    text-align: left !important;
+}
+
+/* FORM FIELDS */
+.form-control, .form-control-sm, select.form-control-sm {
+    background: rgba(255,152,0,0.2) !important;
+    border: 1px solid #ff9800 !important;
+    color: #fff !important;
+}
+
+/* BUTTONS */
+.btn-success {
+    background: #4caf50 !important;
+    border: none !important;
+}
+.btn-danger {
+    background: #d32f2f !important;
+    border: none !important;
+}
+.btn-secondary {
+    background: #616161 !important;
+    border: none !important;
+}
+</style>
+
+<div class="container mt-4">
+
+    <h2 class="page-title">Indent List</h2>
+
+    <div class="text-end back-btn">
+        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-secondary btn-sm">⬅ Back to Dashboard</a>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <div class="text-center">
+                {% for category, msg in messages %}
+                    <p class="flash {{ category }}">{{ msg }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table table-dark table-hover text-center align-middle">
+            <thead>
+                <tr style="background:#ff9800;color:#000;">
+                    <th class="col-narrow">PMS ID</th>
+                    <th>Timestamp</th>
+                    <th class="col-narrow2">Indent No</th>
+                    <th>Indent Date</th>
+                    <th class="col-narrow3">Location</th>
+                    <th>Job Ref</th>
+                    <th>Description</th>
+                    <th>Prepared By</th>
+                    <th>No of Items</th>
+                    <th colspan="2">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if purchases %}
+                    {% for purchase in purchases %}
+                    <tr id="row-{{ purchase.id }}">
+
+                        <form method="POST" action="{{ url_for('purchase.purchase_update', purchase_id=purchase.id) }}">
+
+                            <!-- PMS ID -->
+                            <td class="col-narrow">
+                                <input type="text" name="pms_id" class="form-control form-control-sm"
+                                       value="{{ purchase.pms_id or '' }}" readonly>
+                            </td>
+
+                            <!-- TIMESTAMP -->
+                            <td>
+                                <input type="datetime-local" name="timestamp1"
+                                       value="{{ purchase.timestamp1 or '' }}"
+                                       class="form-control form-control-sm" readonly>
+                            </td>
+
+                            <!-- INDENT NO -->
+                            <td class="col-narrow2">
+                                <input type="text" name="indent_no" class="form-control form-control-sm"
+                                       value="{{ purchase.indent_no or '' }}" readonly>
+                            </td>
+
+                            <!-- INDENT DATE -->
+                            <td>
+                                <input type="date" name="indent_dt"
+                                       value="{{ purchase.indent_dt or '' }}"
+                                       class="form-control form-control-sm">
+                            </td>
+
+                            <!-- LOCATION -->
+                            <td class="col-narrow3">
+                                <input type="text" name="indent_location"
+                                       value="{{ purchase.indent_location or '' }}"
+                                       class="form-control form-control-sm">
+                            </td>
+
+                            <!-- JOB REFERENCE -->
+                            <td>
+                                <select name="job_reference" class="form-control form-control-sm">
+                                    {% set job_refs = ['Civil','Water Proofing','Door','Window','Electrical','CP Fitting','Fire'] %}
+                                    {% for ref in job_refs %}
+                                        <option value="{{ ref }}" {% if purchase.job_reference==ref %}selected{% endif %}>{{ ref }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <!-- DESCRIPTION -->
+                            <td class="description-cell">
+                                <input type="text" name="description" class="form-control form-control-sm"
+                                       value="{{ purchase.description or '' }}">
+                            </td>
+
+                            <!-- PREPARED BY -->
+                            <td>
+                                <select name="prepared_by" class="form-control form-control-sm">
+                                    {% set preparers = ['Biswajit Gayen','Saikat Ghosh'] %}
+                                    {% for prep in preparers %}
+                                        <option value="{{ prep }}" {% if purchase.prepared_by==prep %}selected{% endif %}>
+                                            {{ prep }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <!-- NO OF ITEMS -->
+                            <td>
+                                <select name="no_of_items" class="form-control form-control-sm">
+                                    {% for i in range(1,16) %}
+                                        <option value="{{ i }}" {% if purchase.no_of_items == i %}selected{% endif %}>
+                                            {{ i }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <!-- SAVE BUTTON -->
+                            <td>
+                                <button type="submit" class="btn btn-sm btn-success">Save</button>
+                            </td>
+                        </form>
+
+                        <!-- DELETE BUTTON -->
+                        <td>
+                            <form method="POST"
+                                  action="{{ url_for('purchase.purchase_delete', purchase_id=purchase.id) }}"
+                                  style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Delete this record?');">Delete</button>
+                            </form>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="11" class="text-muted">No purchase records found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

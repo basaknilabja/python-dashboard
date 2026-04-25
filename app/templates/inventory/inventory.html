@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Live Inventory{% endblock %}
+
+{% block content %}
+
+<script>
+
+function openModal(id){
+    document.getElementById(id).style.display='flex';
+}
+function closeModal(id){
+    document.getElementById(id).style.display='none';
+}
+
+function updateStockAndAmount() {
+    const qty = parseFloat(document.getElementById("qty_receive").value) || 0;
+    const rate = parseFloat(document.getElementById("rate").value) || 0;
+    const current = parseFloat(document.getElementById("current_stock").value) || 0;
+
+    document.getElementById("amount").value = (qty * rate).toFixed(2);
+    document.getElementById("stock_tobe").value = (current + qty).toFixed(2);
+}
+
+function setCurrentStock(el){
+    const stock = el.selectedOptions[0].dataset.stock || 0;
+    document.getElementById("current_stock").value = stock;
+    updateStockAndAmount();
+}
+</script>
+
+<div style="display:flex;justify-content:center;margin:40px auto;width:90%;">
+<div style="background:#2c1a03;border:2px solid #ff9800;
+box-shadow:0 0 25px rgba(255,152,0,0.4);
+border-radius:12px;padding:18px;width:100%;">
+=======
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    /* RECEIVE LOGIC */
+    function updateReceiveStock() {
+        const qty = parseFloat(document.getElementById("qty_receive").value) || 0;
+        const rate = parseFloat(document.getElementById("rate").value) || 0;
+        const current = parseFloat(document.getElementById("receive_current_stock").value) || 0;
+
+        document.getElementById("amount").value = (qty * rate).toFixed(2);
+        document.getElementById("receive_new_stock").value = (current + qty).toFixed(2);
+    }
+
+    function setReceiveCurrentStock(el) {
+        const stock = el.selectedOptions[0].dataset.stock || 0;
+        document.getElementById("receive_current_stock").value = stock;
+        updateReceiveStock();
+    }
+
+    /* ISSUE LOGIC */
+    function updateIssueStock() {
+        const qty = parseFloat(document.getElementById("qty_issue").value) || 0;
+        const current = parseFloat(document.getElementById("issue_current_stock").value) || 0;
+        document.getElementById("issue_new_stock").value = (current - qty).toFixed(2);
+    }
+
+    function setIssueCurrentStock(el) {
+        const stock = el.selectedOptions[0].dataset.stock || 0;
+        document.getElementById("issue_current_stock").value = stock;
+        updateIssueStock();
+    }
+    
+</script>
+
+<div style="width:95%;margin:40px auto;">
+
+
+    <h2 style="color:#ff9800;text-align:center;">
+        📦 Live Inventory Stock
+    </h2>
+
+<!-- ================= INVENTORY TABLE =================== -->
+<div style="background:#1b0f02;border:2px solid #ff9800;border-radius:8px;overflow:auto;">
+<table style="width:100%;border-collapse:collapse;font-size:13px;">
+<thead>
+<tr style="background:#ff9800;color:#fff;text-align:center;">
+  <th>Category</th>
+  <th>Sub Category</th>
+  <th>Part Code</th>
+  <th>Item Name</th>
+  <th>Unit</th>
+  <th>Live Stock</th>
+</tr>
+</thead>
+<tbody>
+{% for i in inventory %}
+<tr style="background:#3d2600;color:#f5f5f5;text-align:center;">
+  <td>{{ i.prod_category }}</td>
+  <td>{{ i.sub_category }}</td>
+  <td>{{ i.part_code }}</td>
+  <td style="text-align:left;padding-left:8px;">{{ i.item_name }}</td>
+  <td>{{ i.units }}</td>
+  <td style="font-weight:bold;color:#ffcc80;">{{ i.actual_qty }}</td>
+</tr>
+{% else %}
+<tr>
+  <td colspan="6" style="color:#ffcc80;text-align:center;padding:10px;">
+    No records found
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<!-- ACTION BUTTONS -->
+<div style="margin-top:15px;text-align:right;">
+  <button onclick="openModal('receiveModal')"
+          style="background:#4caf50;color:#fff;padding:8px 16px;border:none;border-radius:6px;">
+    ➕ Receive Stock
+  </button>
+
+  <button onclick="openModal('issueModal')"
+          style="background:#ff5722;color:#fff;padding:8px 16px;border:none;border-radius:6px;margin-left:8px;">
+    ➖ Issue Stock
+  </button>
+</div>
+
+</div>
+=======
+    <div style="text-align:right;margin-bottom:15px;">
+        <button onclick="openModal('receiveModal')"
+            style="background:#4caf50;color:#fff;padding:8px 16px;border:none;border-radius:6px;">
+            ➕ Receive Stock
+        </button>
+
+        <button onclick="openModal('issueModal')"
+            style="background:#ff5722;color:#fff;padding:8px 16px;border:none;border-radius:6px;margin-left:8px;">
+            ➖ Issue Stock
+        </button>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="background:#ff9800;color:#fff;text-align:center;">
+                <th>Category</th>
+                <th>Sub Category</th>
+                <th>Part Code</th>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Live Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in inventory %}
+            <tr style="background:#3d2600;color:#fff;text-align:center;">
+                <td>{{ i.prod_category }}</td>
+                <td>{{ i.sub_category }}</td>
+                <td>{{ i.part_code }}</td>
+                <td style="text-align:left;padding-left:8px;">{{ i.item_name }}</td>
+                <td>{{ i.units }}</td>
+                <td>{{ i.actual_qty }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align:center;padding:10px;">
+                    No records found
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= RECEIVE MODAL ================= -->
+<div id="receiveModal" style="display:none;position:fixed;inset:0;
+
+background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:10;">
+
+<div style="background:#2c1a03;border:2px solid #ff9800;border-radius:10px;
+padding:20px;width:420px;max-height:90vh;overflow:auto;">
+
+<h3 style="color:#ff9800;text-align:center;">➕ Receive Stock</h3>
+
+<form method="POST" action="{{ url_for('inventory.receive_stock') }}">
+
+<div style="margin:8px 0;">
+<label>Item</label>
+<select name="part_code" required style="width:100%;padding:6px;"
+        onchange="setCurrentStock(this)">
+<option value="">-- Select Item --</option>
+{% for p in part_items %}
+<option value="{{ p.part_code }}" data-stock="{{ p.actual_qty }}">
+  {{ p.part_code }} — {{ p.item_name }}
+</option>
+{% endfor %}
+</select>
+</div>
+
+<div style="margin:8px 0;">
+<label>Current Stock</label>
+<input id="current_stock" readonly style="width:100%;padding:6px;">
+</div>
+
+<div style="margin:8px 0;">
+<label>Quantity</label>
+<input id="qty_receive" name="qty_receive" type="number" step="0.01"
+required style="width:100%;padding:6px;"
+oninput="updateStockAndAmount()">
+</div>
+
+<div style="margin:8px 0;">
+<label>Rate</label>
+<input id="rate" name="rate" type="number" step="0.01"
+required style="width:100%;padding:6px;"
+oninput="updateStockAndAmount()">
+</div>
+
+<div style="margin:8px 0;">
+<label>Amount</label>
+<input id="amount" name="amount" readonly style="width:100%;padding:6px;">
+</div>
+
+<div style="margin:8px 0;">
+<label>Stock To Be</label>
+<input id="stock_tobe" readonly style="width:100%;padding:6px;">
+</div>
+
+<div style="margin:8px 0;">
+<label>Vendor</label>
+<select name="vendor_name" required style="width:100%;padding:6px;">
+<option value="">-- Select Vendor --</option>
+{% for v in vendors %}
+<option value="{{ v.vendor_name }}">{{ v.vendor_name }}</option>
+{% endfor %}
+</select>
+</div>
+
+<div style="margin:8px 0;">
+<label>PO Number</label>
+<select name="po_no" style="width:100%;padding:6px;">
+<option value="">-- Select PO --</option>
+{% for p in po_no %}
+<option value="{{ p.po_no }}">{{ p.po_no }}</option>
+{% endfor %}
+</select>
+</div>
+
+<div style="margin:8px 0;">
+<label>Invoice No</label>
+<input name="invoice_no" style="width:100%;padding:6px;">
+</div>
+
+<div style="margin:8px 0;">
+<label>Remarks</label>
+<textarea name="remarks" required rows="2"
+style="width:100%;padding:6px;"></textarea>
+</div>
+
+<div style="margin-top:15px;text-align:center;">
+<button type="submit"
+style="background:#4caf50;color:#fff;padding:6px 14px;border:none;border-radius:4px;">
+Save
+</button>
+
+<button type="button"
+onclick="closeModal('receiveModal')"
+style="background:#de3529;color:#fff;padding:6px 14px;border:none;border-radius:4px;margin-left:8px;">
+Cancel
+</button>
+</div>
+
+</form>
+</div>
+=======
+            background:rgba(0,0,0,0.7);
+            justify-content:center;align-items:center;z-index:100;">
+
+    <div style="background:#2c1a03;border:2px solid #ff9800;
+            border-radius:10px;padding:20px;width:390px;">
+
+        <h3 style="color:#ff9800;text-align:center;">➕ Receive Stock</h3>
+
+        <form method="POST" action="{{ url_for('inventory.receive_stock') }}">
+
+            <label>Item</label>
+            <select name="part_code" required style="width:70%;padding:6px;" onchange="setReceiveCurrentStock(this)">
+                <option value="">-- Select Item --</option>
+                {% for p in part_items %}
+                <option value="{{ p.part_code }}" data-stock="{{ p.actual_qty }}">
+                    {{ p.part_code }} — {{ p.item_name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Current Live Stock</label>
+            <input id="receive_current_stock" readonly style="width:70%;padding:6px;">
+
+            <label>Received Quantity</label>
+            <input id="qty_receive" name="qty_receive" type="number" step="0.01" required style="width:70%;padding:6px;"
+                oninput="updateReceiveStock()">
+
+            <label>New Live Stock</label>
+            <input id="receive_new_stock" readonly style="width:70%;padding:6px;">
+
+            <label>Rate</label>
+            <input id="rate" name="rate" type="number" step="0.01" required style="width:70%;padding:6px;"
+                oninput="updateReceiveStock()">
+
+            <label>Amount</label>
+            <input id="amount" name="amount" readonly style="width:70%;padding:6px;">
+
+            <label>GST</label>
+            <input id="gst" name="gst" style="width:70%;padding:6px;">
+
+            <label>Job</label>
+            <input type="text" id="job" required name="job">
+
+            <label>Purchase Order</label>
+            <select name="po" required style="width:70%;padding:6px;">
+                <option value="">-- Select Item --</option>
+                {% for p in po %}
+                <option value="{{ p.po }}">
+                    {{ p.po }} 
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Vendor </label>
+            <select name="vendor" required style="width:70%;padding:6px;">
+                <option value="">-- Select Item --</option>
+                {% for p in vendor %}
+                <option value="{{ p.vendor }}">
+                    {{ p.vendor }} 
+                </option>
+                {% endfor %}
+            </select>
+
+            <div style="text-align:center;margin-top:15px;">
+                <button type="submit"
+                    style="background:#4caf50;color:#fff;padding:6px 14px;border:none;border-radius:4px;">
+                    Save
+                </button>
+                <button type="button" onclick="closeModal('receiveModal')"
+                    style="background:#999;color:#fff;padding:6px 14px;border:none;border-radius:4px;margin-left:8px;">
+                    Cancel
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ================= ISSUE MODAL ================= -->
+<div id="issueModal" style="display:none;position:fixed;inset:0;
+
+background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:10;">
+
+<div style="background:#2c1a03;border:2px solid #ff9800;border-radius:10px;
+padding:20px;width:380px;">
+
+<h3 style="color:#ff9800;text-align:center;">➖ Issue Stock</h3>
+
+<form method="POST" action="{{ url_for('inventory.issue_stock') }}">
+
+<div style="margin:8px 0;">
+<label>Part Code</label>
+<input name="part_code" required style="width:100%;padding:6px;">
+</div>
+
+<div style="margin:8px 0;">
+<label>Quantity</label>
+<input name="qty_issue" type="number" step="0.01" required style="width:100%;padding:6px;">
+</div>
+
+<div style="margin:8px 0;">
+<label>Issued To</label>
+<input name="issued_to" required style="width:100%;padding:6px;">
+</div>
+
+<div style="margin-top:15px;text-align:center;">
+<button type="submit"
+style="background:#ff5722;color:#fff;padding:6px 14px;border:none;border-radius:4px;">
+Issue
+</button>
+
+<button type="button"
+onclick="closeModal('issueModal')"
+style="background:#999;color:#fff;padding:6px 14px;border:none;border-radius:4px;margin-left:8px;">
+Cancel
+</button>
+</div>
+
+</form>
+</div>
+=======
+            background:rgba(0,0,0,0.7);
+            justify-content:center;align-items:center;z-index:100;">
+
+    <div style="background:#2c1a03;border:2px solid #ff9800;
+            border-radius:10px;padding:20px;width:320px;">
+
+        <h3 style="color:#ff9800;text-align:center;">➖ Issue Stock</h3>
+
+        <form method="POST" action="{{ url_for('inventory.issue_stock') }}">
+
+            <label>Item</label>
+            <select name="part_code" required style="width:70%;padding:6px;" onchange="setIssueCurrentStock(this)">
+                <option value="">-- Select Item --</option>
+                {% for p in part_items %}
+                <option value="{{ p.part_code }}" data-stock="{{ p.actual_qty }}">
+                    {{ p.part_code }} — {{ p.item_name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Current Live Stock</label>
+            <input id="issue_current_stock" readonly style="width:70%;padding:6px;">
+
+            <label>Quantity Issued</label>
+            <input id="qty_issue" name="qty_issue" type="number" step="0.01" required style="width:70%;padding:6px;"
+                oninput="updateIssueStock()">
+
+            <label>New Live Stock</label>
+            <input id="issue_new_stock" readonly style="width:70%;padding:6px;">
+
+            <label>Contractor</label>
+            <select name="contractor" required style="width:70%;padding:6px;">
+                <option value="">-- Select Item --</option>
+                {% for p in contractor %}
+                <option value="{{ p.contractor }}">
+                    {{ p.contractor }} 
+                </option>
+                {% endfor %}
+            </select>
+
+            <div style="text-align:center;margin-top:15px;">
+                <button type="submit"
+                    style="background:#ff5722;color:#fff;padding:6px 14px;border:none;border-radius:4px;">
+                    Issue
+                </button>
+                <button type="button" onclick="closeModal('issueModal')"
+                    style="background:#999;color:#fff;padding:6px 14px;border:none;border-radius:4px;margin-left:8px;">
+                    Cancel
+                </button>
+            </div>
+
+        </form>
+    </div>
+>>>>>>> 173663d6ecbbabca137c6a017c224c737be56dc4
+</div>
+
+{% endblock %}
