@@ -21,7 +21,6 @@ from app.routes.sales.helpers import (
     calculate_next_plan
 )
 
-
 @sales_bp.route("/presales", methods=["GET", "POST"])
 @login_required
 def sales_presales():
